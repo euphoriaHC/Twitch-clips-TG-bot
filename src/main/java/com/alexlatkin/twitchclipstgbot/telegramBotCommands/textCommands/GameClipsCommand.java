@@ -1,0 +1,127 @@
+package com.alexlatkin.twitchclipstgbot.telegramBotCommands.textCommands;
+
+import com.alexlatkin.twitchclipstgbot.controller.*;
+import com.alexlatkin.twitchclipstgbot.keyboard.KeyboardGameClipsCommand;
+import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
+import com.alexlatkin.twitchclipstgbot.model.dto.TwitchGameDto;
+import com.alexlatkin.twitchclipstgbot.model.entity.Broadcaster;
+import com.alexlatkin.twitchclipstgbot.model.entity.Game;
+import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.BlockButtonCommand;
+import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.FollowButtonCommand;
+import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.commandsWIthAnswer.NextClipButtonCommand;
+import lombok.RequiredArgsConstructor;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+@RequiredArgsConstructor
+public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecondMessage {
+    final ClipsController clipsController;
+    final UserController userController;
+    final GameController gameController;
+    final TwitchController twitchController;
+    final FollowButtonCommand followButtonCommand;
+    final BlockButtonCommand blockButtonCommand;
+    final NextClipButtonCommand nextClipButtonCommand;
+    final CacheClipsController cacheClipsController;
+    final CacheBroadcasterController cacheBroadcasterController;
+    @Override
+    public SendMessage firstMessage(Update update) {
+        var chatId = update.getMessage().getChatId().toString();
+        var answerText = "Введите название игры или категории";
+
+        return new SendMessage(chatId, answerText);
+    }
+    @Override
+    public SendMessage secondMessage(Update update) {
+        var chatId = update.getMessage().getChatId();
+        var chatIdString = chatId.toString();
+        var gameName = update.getMessage().getText();
+
+        Game game = new Game();
+        List<TwitchGameDto> gameListDto;
+        List<TwitchClip> clipList;
+
+        if (gameController.existsGameByGameName(gameName)) {
+            game = gameController.getGameByGameName(gameName);
+        } else if (gameController.existsGameByMisprintGameName(gameName)) {
+            List<Game> games = gameController.findGameByMisprintGameName(gameName);
+            game = games.get(0);
+        } else {
+
+            gameListDto = twitchController.getGameByGameName(gameName);
+
+            if (gameListDto.isEmpty()) {
+                return new SendMessage(chatIdString
+                        , "Некорректное название игры, отправте команду /game_clips снова и напишите название игры корректно");
+            }
+
+            game.setGameId(gameListDto.get(0).getId());
+            game.setGameName(gameListDto.get(0).getName());
+            gameController.addGame(game);
+        }
+
+        clipList = clipsController.getClipsByGame(game).getData();
+
+        var filterClips = new ArrayList<>(clipList.stream().filter(clip -> !userController.getUserBlackListByUserChatId(chatId).contains(
+                new Broadcaster(clip.getBroadcasterId(), clip.getBroadcasterName()))).toList());
+
+        filterClips.sort(Comparator.comparing(TwitchClip::getViewCount));
+
+        cacheClipsController.addClipListByUserChatId(chatIdString, filterClips);
+
+        var firstClip = cacheClipsController.getClipByUserChatId(chatIdString);
+        var firstBc = new Broadcaster(firstClip.getBroadcasterId(), firstClip.getBroadcasterName());
+
+        cacheBroadcasterController.cacheCaster(chatIdString + "GAME_CLIPS_COMMAND_CASTER", firstBc);
+
+        var msg = new SendMessage(chatIdString, firstClip.getUrl());
+
+        if (userController.getUserFollowListByUserChatId(chatId).contains(firstBc)) {
+            msg.setReplyMarkup(KeyboardGameClipsCommand.createKeyboardWithNextButton());
+        } else {
+            msg.setReplyMarkup(KeyboardGameClipsCommand.createFullKeyboard(firstBc.getBroadcasterName()));
+        }
+
+        return msg;
+    }
+
+    @Override
+    public BotApiMethod clickButton(Update update) {
+        var buttonKey = update.getCallbackQuery().getData();
+        var chatIdString = update.getCallbackQuery().getMessage().getChatId().toString();
+        List<TwitchClip> twitchClipList = cacheClipsController.getClipListByUserChatId(chatIdString);
+
+        if (twitchClipList.isEmpty() && buttonKey.equals("GAME_CLIPS_NEXT")) {
+            return new SendMessage(chatIdString, "Клипы законичились");
+        } else {
+
+            var keyForPreviousCaster = chatIdString + "GAME_CLIPS_COMMAND_CASTER";
+            var caster = new Broadcaster();
+
+            BotApiMethod answer = null;
+
+            switch (buttonKey) {
+                case "GAME_CLIPS_FOLLOW" -> {
+                    caster = cacheBroadcasterController.getCacheCaster(keyForPreviousCaster);
+                    answer = followButtonCommand.actionButtonInCurrentMessage(update, caster);
+                }
+                case "GAME_CLIPS_BLOCK" -> {
+                    caster = cacheBroadcasterController.getCacheCaster(keyForPreviousCaster);
+                    answer = blockButtonCommand.actionButtonInCurrentMessage(update, caster);
+                }
+                case "GAME_CLIPS_NEXT" -> {
+                    var clip = cacheClipsController.getClipByUserChatId(chatIdString);
+                    cacheBroadcasterController.cacheCaster(keyForPreviousCaster, new Broadcaster(clip.getBroadcasterId(), clip.getBroadcasterName()));
+                    answer = nextClipButtonCommand.actionWithMessage(update, clip);
+                }
+            }
+
+            return answer;
+        }
+    }
+}
