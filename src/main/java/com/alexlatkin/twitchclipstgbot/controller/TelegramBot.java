@@ -4,6 +4,7 @@ import com.alexlatkin.twitchclipstgbot.config.BotConfig;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+@Slf4j
 @Getter
 @Setter
 @AllArgsConstructor
@@ -41,6 +43,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             var textCommands = botConfig.getTelegramCommands().getTextCommandsFirstMessage();
             var textCommandsWithSecondMessage = botConfig.getTelegramCommands().getTextCommandWithSecondMessage();
             var cacheCommand = cacheChatIdAndUserCommandMessage.get(chatId);
+            log.info("Пользователь " + chatId + " отправил сообщение. Текст сообщения - " + userMessageText);
 
             if (textCommands.containsKey(userMessageText)) {
                 var response = textCommands.get(userMessageText).firstMessage(update);
@@ -62,6 +65,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             var buttonKey = update.getCallbackQuery().getData();
             var buttonCommands = botConfig.getTelegramCommands().getButtonCommands();
+            log.info("Пользователь " + update.getCallbackQuery().getMessage().getChatId() + " нажал кнопку. buttonKey - " + buttonKey);
 
             if (buttonCommands.containsKey(buttonKey)) {
                 var response = buttonCommands.get(buttonKey).clickButton(update);
@@ -74,6 +78,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }

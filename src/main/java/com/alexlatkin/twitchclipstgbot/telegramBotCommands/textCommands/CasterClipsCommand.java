@@ -10,6 +10,7 @@ import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.BlockB
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.FollowButtonCommand;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.commandsWIthAnswer.NextClipButtonCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSecondMessage {
     final ClipsController clipsController;
@@ -53,6 +55,7 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
             try {
                 bcList = twitchController.getCasterByCasterName(broadcasterName);
             } catch (BroadcasterNotFoundException e) {
+                log.error("Пользователь ввел некорректное имя стримера "  + broadcasterName + ", " + e.getMessage());
                 return new SendMessage(chatIdString, "Некорректное имя стримера, отправте команду /caster_clips снова и напишите имя стримера корректно");
             }
 
