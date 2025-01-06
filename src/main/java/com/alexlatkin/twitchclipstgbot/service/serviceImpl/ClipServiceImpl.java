@@ -24,22 +24,16 @@ public class ClipServiceImpl implements ClipService {
 
     @Override
     public TwitchClipsDto getClipsByGame(Game game) {
-        LocalDate localDate = LocalDate.now();
-        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-        return twitchService.getClipsByGameId(game.getGameId(), date);
+        return twitchService.getClipsByGameId(game.getGameId(), getDate());
     }
 
     @Override
     public List<CompletableFuture<TwitchClipsDto>> getClipsByUserFollowList(List<Broadcaster> userFollowList) {
-        LocalDate localDate = LocalDate.now();
-        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
         List<CompletableFuture<TwitchClipsDto>> allClips = new ArrayList<>();
 
         List<Integer> broadcastersId = userFollowList.stream().map(Broadcaster::getBroadcasterId).toList();
 
-        broadcastersId.forEach(bcId -> allClips.add(twitchService.getClipsByBroadcastersId(bcId, date)));
+        broadcastersId.forEach(bcId -> allClips.add(twitchService.getClipsByBroadcastersId(bcId, getDate())));
 
         try {
             CompletableFuture.allOf(allClips.toArray(new CompletableFuture[0])).get();
@@ -53,10 +47,11 @@ public class ClipServiceImpl implements ClipService {
 
     @Override
     public TwitchClipsDto getClipsByBroadcaster(Broadcaster broadcaster) {
-        LocalDate localDate = LocalDate.now();
-        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return twitchService.getClipsByBroadcasterId(broadcaster.getBroadcasterId(), getDate());
+    }
 
-        return twitchService.getClipsByBroadcasterId(broadcaster.getBroadcasterId(), date);
+    private String getDate() {
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
 }
