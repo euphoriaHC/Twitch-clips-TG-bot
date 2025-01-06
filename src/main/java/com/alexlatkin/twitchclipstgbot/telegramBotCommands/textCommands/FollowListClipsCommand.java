@@ -8,6 +8,7 @@ import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
 import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClipsDto;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.commandsWIthAnswer.NextClipButtonCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-
+@Slf4j
 @RequiredArgsConstructor
 public class FollowListClipsCommand implements BotButtonCommands, BotCommands {
     final UserController userController;
@@ -45,8 +46,10 @@ public class FollowListClipsCommand implements BotButtonCommands, BotCommands {
                     try {
                         clipList.addAll(clip.get().getData());
                     } catch (InterruptedException e) {
+                        log.error("Error: " + e.getMessage());
                         throw new RuntimeException(e);
                     } catch (ExecutionException e) {
+                        log.error("Error: " + e.getMessage());
                         throw new RuntimeException(e);
                     }
 

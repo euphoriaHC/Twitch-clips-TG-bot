@@ -6,6 +6,7 @@ import com.alexlatkin.twitchclipstgbot.model.entity.Game;
 import com.alexlatkin.twitchclipstgbot.service.ClipService;
 import com.alexlatkin.twitchclipstgbot.service.TwitchService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ClipServiceImpl implements ClipService {
@@ -42,6 +44,7 @@ public class ClipServiceImpl implements ClipService {
         try {
             CompletableFuture.allOf(allClips.toArray(new CompletableFuture[0])).get();
         } catch (InterruptedException | ExecutionException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 

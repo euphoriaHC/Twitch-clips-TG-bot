@@ -5,12 +5,13 @@ import com.alexlatkin.twitchclipstgbot.model.entity.User;
 import com.alexlatkin.twitchclipstgbot.model.repository.UserRepository;
 import com.alexlatkin.twitchclipstgbot.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void addUser(User user) {
         userRepository.save(user);
+        log.info(user + " пользователь записан в дб");
     }
 
     @Transactional

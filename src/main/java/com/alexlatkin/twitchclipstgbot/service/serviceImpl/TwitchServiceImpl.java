@@ -7,6 +7,7 @@ import com.alexlatkin.twitchclipstgbot.service.TwitchService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class TwitchServiceImpl implements TwitchService {
@@ -42,8 +44,10 @@ public class TwitchServiceImpl implements TwitchService {
             rootTwitchGame = mapper.readValue(response.body(), RootTwitchGame.class);
 
         } catch (IOException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -69,8 +73,10 @@ public class TwitchServiceImpl implements TwitchService {
             rootTwitchUser = mapper.readValue(response.body(), RootTwitchUser.class);
 
         } catch (IOException e){
+            log.error("Error: " + e.getMessage());
             throw new BroadcasterNotFoundException("Bc not found");
         } catch (InterruptedException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -98,8 +104,10 @@ public class TwitchServiceImpl implements TwitchService {
             twitchClipsDto = mapper.readValue(response.body(), TwitchClipsDto.class);
 
         } catch (IOException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -126,6 +134,7 @@ public class TwitchServiceImpl implements TwitchService {
             try {
                 twitchClipsDto = mapper.readValue(data, TwitchClipsDto.class);
             } catch (JsonProcessingException e) {
+                log.error("Error: " + e.getMessage());
                 throw new RuntimeException(e);
             }
             return twitchClipsDto;
@@ -154,8 +163,10 @@ public class TwitchServiceImpl implements TwitchService {
             twitchClipsDto = mapper.readValue(response.body(), TwitchClipsDto.class);
 
         } catch (IOException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 

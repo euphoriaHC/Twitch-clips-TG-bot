@@ -5,6 +5,7 @@ import com.alexlatkin.twitchclipstgbot.model.repository.CacheClipsRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CacheClipsImpl implements CacheClipsRepository {
@@ -27,6 +29,7 @@ public class CacheClipsImpl implements CacheClipsRepository {
         try {
             twitchClipAsString = mapper.writeValueAsString(twitchClip);
         } catch (JsonProcessingException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -52,6 +55,7 @@ public class CacheClipsImpl implements CacheClipsRepository {
         try {
             clip = mapper.readValue(listOperations.leftPop(key).toString(), TwitchClip.class);
         } catch (JsonProcessingException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -68,6 +72,7 @@ public class CacheClipsImpl implements CacheClipsRepository {
         try {
             twitchClipsArray = mapper.readValue(listOperations.range(key, 0, -1).toString(), TwitchClip[].class);
         } catch (JsonProcessingException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 

@@ -5,10 +5,12 @@ import com.alexlatkin.twitchclipstgbot.model.repository.CacheBroadcasterReposito
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CacheBroadcasterImpl implements CacheBroadcasterRepository {
@@ -23,6 +25,7 @@ public class CacheBroadcasterImpl implements CacheBroadcasterRepository {
         try {
             casterAsString = mapper.writeValueAsString(broadcaster);
         } catch (JsonProcessingException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -38,6 +41,7 @@ public class CacheBroadcasterImpl implements CacheBroadcasterRepository {
         try {
             caster = mapper.readValue(valueOperations.get(key).toString(), Broadcaster.class);
         } catch (JsonProcessingException e) {
+            log.error("Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
 
