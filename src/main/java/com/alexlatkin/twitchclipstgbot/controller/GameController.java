@@ -3,11 +3,11 @@ package com.alexlatkin.twitchclipstgbot.controller;
 import com.alexlatkin.twitchclipstgbot.model.entity.Game;
 import com.alexlatkin.twitchclipstgbot.service.GameService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 public class GameController {
     private final GameService gameService;
