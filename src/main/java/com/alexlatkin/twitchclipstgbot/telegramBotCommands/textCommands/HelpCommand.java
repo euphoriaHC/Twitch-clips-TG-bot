@@ -1,11 +1,19 @@
 package com.alexlatkin.twitchclipstgbot.telegramBotCommands.textCommands;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+/*
+ Класс команды /help
+ Относится к командам, которые обрабатывают одно сообщение пользователя, сообщения этой команды не имеют клавиатуры
+*/
 @RequiredArgsConstructor
+@Component
 public class HelpCommand implements BotCommands {
+
+    //  Отправляет пользователю информацию о боте и список всех команд
     @Override
     public SendMessage firstMessage(Update update) {
         var chatId = update.getMessage().getChatId().toString();

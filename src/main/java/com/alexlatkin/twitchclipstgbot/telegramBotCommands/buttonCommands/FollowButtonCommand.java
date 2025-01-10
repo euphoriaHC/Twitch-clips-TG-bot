@@ -10,11 +10,21 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+/*
+  Класс кнопки "Подписаться на стримернейм"
+*/
 @Component
 @RequiredArgsConstructor
 public class FollowButtonCommand implements ButtonCommands {
     final UserController userController;
     final BroadcasterController broadcasterController;
+
+    /*
+      Метод срабатывает когда в одном из сообщений нажимают кнопку "Подписаться на стримернейм"
+      При вызове метода стример добавляется в список подписок пользователя
+      Метод возвращает EditMessageText объект (Просто обновляет сообщение на котором была нажата кнопка) и обновляет клавиатуру
+      текущего сообщения удаляя возможность подписаться на стримера повторно или заблокировать его
+    */
     @Override
     public EditMessageText actionButtonInCurrentMessage(Update update, Broadcaster broadcaster) {
         var chatId = update.getCallbackQuery().getMessage().getChatId();

@@ -11,6 +11,7 @@ import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.Follow
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.commandsWIthAnswer.NextClipButtonCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -19,8 +20,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/*
+ Класс команды /caster_clips
+ Относится к командам, которые обрабатывают несколько сообщений пользователя, сообщения этой команды поддерживают клавиатуру
+ Отправляет пользователю клипы стримера созданные за сутки
+*/
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSecondMessage {
     final ClipsController clipsController;
     final UserController userController;
@@ -31,6 +38,11 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
     final NextClipButtonCommand nextClipButtonCommand;
     final CacheClipsController cacheClipsController;
     final CacheBroadcasterController cacheBroadcasterController;
+
+    /*
+      Метод обрабатывает вызов команды (Сообщение /caster_clips)
+      Возвращает SendMessage объект, уточняет у пользователя ник стримера, клипы которого пользователь хочет получить
+    */
     @Override
     public SendMessage firstMessage(Update update) {
         var chatId = update.getMessage().getChatId().toString();
@@ -38,6 +50,13 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
 
         return new SendMessage(chatId, answerText);
     }
+
+    /*
+      Метод вызывается только после метода firstMessage
+      Метод получает ник стримера из сообщения пользователя, делает запрос через ClipsController, получает клипы,
+      сортирует их, после кэширует их и стримера в Redis
+      Метод возвращает объект SendMessage (И назначает клавиатуру), где текст это url на первый клип
+    */
     @Override
     public SendMessage secondMessage(Update update) {
         var chatId = update.getMessage().getChatId();
@@ -47,6 +66,11 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
 
         List<TwitchUser> bcList;
 
+        /*
+          В ветвлении попытка присвоить значение переменной caster
+          Отправляется запрос в дб, если стримера там нет, то делается запрос к твичу через TwitchController
+          В случае неудачи выходит из метода и просит пользователя повторить команду указав корректные данные...
+        */
         if (broadcasterController.existsBroadcasterByBroadcasterName(broadcasterName)) {
             caster.setBroadcasterId(broadcasterController.getBroadcasterByBroadcasterName(broadcasterName).getBroadcasterId());
             caster.setBroadcasterName(broadcasterController.getBroadcasterByBroadcasterName(broadcasterName).getBroadcasterName());
@@ -56,7 +80,7 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
                 bcList = twitchController.getCasterByCasterName(broadcasterName);
             } catch (BroadcasterNotFoundException e) {
                 log.error("Пользователь ввел некорректное имя стримера "  + broadcasterName + ", " + e.getMessage());
-                return new SendMessage(chatIdString, "Некорректное имя стримера, отправте команду /caster_clips снова и напишите имя стримера корректно");
+                return new SendMessage(chatIdString, "Некорректное имя стримера, отправьте команду /caster_clips снова и напишите имя стримера корректно");
             }
 
             caster.setBroadcasterId(bcList.get(0).getId());
@@ -69,6 +93,9 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
                     , String.format("%S находится у вас в чёрном списке, если хотите увидеть клипы %S, удалите его из чёрного списка командой /delete и снова повторите команду /caster_clips", broadcasterName, broadcasterName));
         }
 
+        /*
+          Все что ниже это просто запрос к твичу за клипами стримера, сортировка и кэширования этих клипов и стримера...
+        */
         List<TwitchClip> clipList = new ArrayList<>(clipsController.getClipsByBroadcaster(caster).getData());
 
         if (clipList.isEmpty()) {
@@ -83,6 +110,7 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
 
         cacheBroadcasterController.cacheCaster(chatIdString + "CASTER_CLIPS_COMMAND_CASTER", caster);
 
+        // Подготовка SendMessage объекта (Установка клавиатуры и текста сообщения) и выход из метода
         var msg = new SendMessage(chatIdString, clip.getUrl());
 
         if (userController.getUserFollowListByUserChatId(chatId).contains(caster)) {
@@ -93,7 +121,12 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
 
         return msg;
     }
-    
+
+    /*
+      Метод срабатывает при нажатии пользователем на кнопку клавиатуры одного из сообщений принадлежащих команде /caster_clips
+      Определяет какая из кнопок была нажата и вызывает соответствующий метод...
+      Возвращает SenMessage или EditMessageText объект в зависимости от нажатой кнопки...
+    */
     @Override
     public BotApiMethod clickButton(Update update) {
         var buttonKey = update.getCallbackQuery().getData();

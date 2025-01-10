@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+// Класс взаимодействует с пользователем бота
 @Slf4j
 @Getter
 @Setter
@@ -34,9 +35,15 @@ public class TelegramBot extends TelegramLongPollingBot {
         return botConfig.getToken();
     }
 
+    /*
+        Метод срабатывает при активности пользователя (Отправка сообщения или нажатие кнопки клавиатуры на сообщении)
+        Если было отправлено сообщение то оно кэшируется в мапе, это необходимо для корректной работы команд, которым нужна
+        дополнительная информация от пользователя
+    */
     @Override
     public void onUpdateReceived(Update update) {
 
+        // Если пользователь отправил сообщение
         if (update.hasMessage()) {
             var userMessageText = update.getMessage().getText();
             var chatId = update.getMessage().getChatId().toString();
@@ -62,6 +69,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 sendAnswerMessage(response);
             }
 
+        // Если пользователь нажал на кнопку
         } else if (update.hasCallbackQuery()) {
             var buttonKey = update.getCallbackQuery().getData();
             var buttonCommands = botConfig.getTelegramCommands().getButtonCommands();
@@ -74,6 +82,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    // Бот отправляет сообщение пользователю
     public void sendAnswerMessage(BotApiMethod message) {
         try {
             execute(message);

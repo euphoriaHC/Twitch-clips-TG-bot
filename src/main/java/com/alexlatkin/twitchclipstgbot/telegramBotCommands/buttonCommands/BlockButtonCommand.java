@@ -16,13 +16,23 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
+/*
+  Класс кнопки "Скрыть стримернейм"
+*/
 @RequiredArgsConstructor
 @Component
 public class BlockButtonCommand implements ButtonCommands {
     final UserController userController;
     final BroadcasterController broadcasterController;
     final CacheClipsController cacheClipsController;
+
+    /*
+      Метод срабатывает когда в одном из сообщений нажимают кнопку "Скрыть стримернейм"
+      При вызове метода нежелательный стример добавляется в чёрный список пользователя, после чего из кэша клипов Redis удаляются все клипы
+      этого стримера и сохраняется отфильтрованный лист
+      Метод возвращает EditMessageText объект (Просто обновляет сообщение на котором была нажата кнопка) и обновляет клавиатуру
+      текущего сообщения удаляя возможность подписаться на стримера или повторно заблокировать его
+    */
     @Override
     public EditMessageText actionButtonInCurrentMessage(Update update, Broadcaster broadcaster) {
         var chatId = update.getCallbackQuery().getMessage().getChatId();

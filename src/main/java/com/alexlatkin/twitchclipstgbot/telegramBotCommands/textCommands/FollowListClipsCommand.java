@@ -9,6 +9,7 @@ import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClipsDto;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.commandsWIthAnswer.NextClipButtonCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -18,14 +19,24 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/*
+ Класс команды /follow_list_clips
+ Относится к командам, которые обрабатывают одно сообщение пользователя, сообщения этой команды поддерживают клавиатуру
+ Отправляет пользователю клипы стримеров из подписок, созданные за сутки
+*/
 @Slf4j
 @RequiredArgsConstructor
+@Component
 public class FollowListClipsCommand implements BotButtonCommands, BotCommands {
     final UserController userController;
     final ClipsController clipsController;
     final NextClipButtonCommand nextClipButtonCommand;
     final CacheClipsController cacheClipsController;
 
+    /*
+      Метод обрабатывает вызов команды (Сообщение /follow_list_clips)
+      Делает запрос через ClipsController, получает клипы, сортирует их, после кэширует их в Redis
+    */
     @Override
     public SendMessage firstMessage(Update update) {
         var chatId = update.getMessage().getChatId();
@@ -71,6 +82,9 @@ public class FollowListClipsCommand implements BotButtonCommands, BotCommands {
 
     }
 
+    /*
+      Метод срабатывает при нажатии пользователем на кнопку клавиатуры одного из сообщений принадлежащих команде /follow_list_clips
+    */
     @Override
     public SendMessage clickButton(Update update) {
         var buttonKey = update.getCallbackQuery().getData();
@@ -79,7 +93,7 @@ public class FollowListClipsCommand implements BotButtonCommands, BotCommands {
         var answer = new SendMessage();
 
         if (twitchClipList.isEmpty()) {
-            return new SendMessage(chatIdString, "Клипы из фоллоу листа законичилсь");
+            return new SendMessage(chatIdString, "Клипы отслеживаемых стримеров закончились");
         }
 
         if (buttonKey.equals("FOLLOW_LIST_CLIPS_NEXT")) {

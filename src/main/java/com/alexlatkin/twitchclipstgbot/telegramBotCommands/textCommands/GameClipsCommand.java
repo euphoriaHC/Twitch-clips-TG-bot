@@ -10,6 +10,7 @@ import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.BlockB
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.FollowButtonCommand;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.commandsWIthAnswer.NextClipButtonCommand;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -18,7 +19,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/*
+ Класс команды /game_clips
+ Относится к командам, которые обрабатывают несколько сообщений пользователя, сообщения этой команды поддерживают клавиатуру
+ Отправляет пользователю клипы созданные за сутки в выбранной категории или игры
+*/
 @RequiredArgsConstructor
+@Component
 public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecondMessage {
     final ClipsController clipsController;
     final UserController userController;
@@ -29,6 +36,11 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
     final NextClipButtonCommand nextClipButtonCommand;
     final CacheClipsController cacheClipsController;
     final CacheBroadcasterController cacheBroadcasterController;
+
+    /*
+      Метод обрабатывает вызов команды (Сообщение /game_clips)
+      Возвращает SendMessage объект, уточняет у пользователя категорию или игру, клипы которой пользователь хочет получить
+    */
     @Override
     public SendMessage firstMessage(Update update) {
         var chatId = update.getMessage().getChatId().toString();
@@ -36,6 +48,14 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
 
         return new SendMessage(chatId, answerText);
     }
+
+    /*
+      Метод вызывается только после метода firstMessage
+      Метод получает название игры или категории из сообщения пользователя, делает запрос через ClipsController, получает клипы,
+      фильтрует их и сортирует, после кэширует их в Redis
+      Кэшируется стример первого клипа
+      Метод возвращает объект SendMessage (И назначает клавиатуру), где текст это url на первый клип
+    */
     @Override
     public SendMessage secondMessage(Update update) {
         var chatId = update.getMessage().getChatId();
@@ -46,6 +66,11 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
         List<TwitchGameDto> gameListDto;
         List<TwitchClip> clipList;
 
+        /*
+          В ветвлении попытка присвоить значение переменной game
+          Делается запрос в дб (В том числе с проверкой на опечатку), если игры нет в дб то делается запрос к твичу через TwitchController
+          В случае неудачи выходит из метода и просит пользователя повторить команду указав корректные данные...
+        */
         if (gameController.existsGameByGameName(gameName)) {
             game = gameController.getGameByGameName(gameName);
         } else if (gameController.existsGameByMisprintGameName(gameName)) {
@@ -57,7 +82,7 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
 
             if (gameListDto.isEmpty()) {
                 return new SendMessage(chatIdString
-                        , "Некорректное название игры, отправте команду /game_clips снова и напишите название игры корректно");
+                        , "Некорректное название игры, отправьте команду /game_clips снова и напишите название игры корректно");
             }
 
             game.setGameId(gameListDto.get(0).getId());
@@ -65,6 +90,9 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
             gameController.addGame(game);
         }
 
+        /*
+          Все что ниже это просто запрос к твичу за клипами по игре, фильтрация, сортировка и кэширования этих клипов и стримера...
+        */
         clipList = clipsController.getClipsByGame(game).getData();
 
         var filterClips = new ArrayList<>(clipList.stream().filter(clip -> !userController.getUserBlackListByUserChatId(chatId).contains(
@@ -79,6 +107,7 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
 
         cacheBroadcasterController.cacheCaster(chatIdString + "GAME_CLIPS_COMMAND_CASTER", firstBc);
 
+        // Подготовка SendMessage объекта (Установка клавиатуры и текста сообщения) и выход из метода
         var msg = new SendMessage(chatIdString, firstClip.getUrl());
 
         if (userController.getUserFollowListByUserChatId(chatId).contains(firstBc)) {
@@ -90,6 +119,11 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
         return msg;
     }
 
+    /*
+      Метод срабатывает при нажатии пользователем на кнопку клавиатуры одного из сообщений принадлежащих команде /game_clips
+      Определяет какая из кнопок была нажата и вызывает соответствующий метод...
+      Возвращает SenMessage или EditMessageText объект в зависимости от нажатой кнопки...
+    */
     @Override
     public BotApiMethod clickButton(Update update) {
         var buttonKey = update.getCallbackQuery().getData();
@@ -97,7 +131,7 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
         List<TwitchClip> twitchClipList = cacheClipsController.getClipListByUserChatId(chatIdString);
 
         if (twitchClipList.isEmpty() && buttonKey.equals("GAME_CLIPS_NEXT")) {
-            return new SendMessage(chatIdString, "Клипы законичились");
+            return new SendMessage(chatIdString, "Клипы закончились");
         } else {
 
             var keyForPreviousCaster = chatIdString + "GAME_CLIPS_COMMAND_CASTER";

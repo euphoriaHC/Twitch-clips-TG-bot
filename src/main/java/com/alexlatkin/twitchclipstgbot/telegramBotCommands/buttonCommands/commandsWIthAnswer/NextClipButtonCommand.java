@@ -11,11 +11,20 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-
+/*
+  Класс кнопки "Следующий клип"
+*/
 @Component
 @RequiredArgsConstructor
 public class NextClipButtonCommand implements ButtonCommandsWithAnswer {
     final UserController userController;
+
+    /*
+      Метод срабатывает когда в одном из сообщений нажимают кнопку "Следующий клип"
+      Метод возвращает SendMessage объект, где текст это клип из кэша Redis, назначает клавиатуру в зависимости
+      от команды из которой он был вызван.
+      При назначении клавиатуры проверятся наличие или отсутствием стримера в списке подписок пользователя
+    */
     @Override
     public SendMessage actionWithMessage(Update update, TwitchClip clip) {
         var chatId = update.getCallbackQuery().getMessage().getChatId();

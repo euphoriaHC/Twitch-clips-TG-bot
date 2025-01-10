@@ -19,12 +19,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/*
+  Класс имеет методы для запросов к твичу...
+  Начальная дата, используемая для фильтрации клипов 00:00 по Мск в день запроса
+  Максимум клипов за запрос 100
+  Больше тут https://dev.twitch.tv/docs/api/reference/
+*/
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class TwitchServiceImpl implements TwitchService {
     private final TwitchConfig twitchConfig;
     private final ObjectMapper mapper = new ObjectMapper();
+
+    /*
+      Метод получения игры по названию игры
+      Клип игры нельзя получить по названию игры, поэтому с помощью этого метода мы получаем айди игры, которое уже используем для получения клипов...
+    */
     @Override
     public List<TwitchGameDto> getGame(String gameName) {
         StringBuilder uriSb = new StringBuilder(twitchConfig.getUrl());
@@ -54,6 +65,10 @@ public class TwitchServiceImpl implements TwitchService {
         return rootTwitchGame.getData();
     }
 
+    /*
+      Метод получения стримера по нику
+      Клип стримера нельзя получить по нику, поэтому с помощью этого метода мы получаем айди стримера, которое уже используем для получения клипов...
+    */
     @Override
     public List<TwitchUser> getBroadcaster(String broadcasterName) {
         StringBuilder uriSb = new StringBuilder(twitchConfig.getUrl());
@@ -83,6 +98,7 @@ public class TwitchServiceImpl implements TwitchService {
         return rootTwitchUser.getData();
     }
 
+    // Запрос на клипы по айди игры, ничего интересного
     @Override
     public TwitchClipsDto getClipsByGameId(int gameId, String date) {
         StringBuilder uriSb = new StringBuilder(twitchConfig.getUrl());
@@ -90,7 +106,6 @@ public class TwitchServiceImpl implements TwitchService {
                 .append(gameId)
                 .append("&started_at=")
                 .append(date)
-                .append("T00:00:00%2B03:00")
                 .append("&first=100");
 
         var client = HttpClient.newHttpClient();
@@ -114,6 +129,10 @@ public class TwitchServiceImpl implements TwitchService {
         return twitchClipsDto;
     }
 
+    /*
+      Метод используется, когда нужно получить клипы по нескольким стримерам (Команда /follow_list_clips)
+      Асинхронный, так как твич не позволяет получить клипы по нескольким стримерам за один запрос
+    */
     @Override
     @Async
     public CompletableFuture<TwitchClipsDto> getClipsByBroadcastersId(int broadcasterId, String date) {
@@ -121,8 +140,7 @@ public class TwitchServiceImpl implements TwitchService {
            uriSb.append("clips?broadcaster_id=")
                 .append(broadcasterId)
                 .append("&started_at=")
-                .append(date)
-                .append("T00:00:00%2B03:00");
+                .append(date);
 
         var client = HttpClient.newHttpClient();
 
@@ -143,14 +161,14 @@ public class TwitchServiceImpl implements TwitchService {
         return twitchClipsDtoCompletableFuture;
     }
 
+    // Запрос на клипы по айди стримера, ничего интересного
     @Override
     public TwitchClipsDto getClipsByBroadcasterId(int broadcasterId, String date) {
         StringBuilder uriSb = new StringBuilder(twitchConfig.getUrl());
            uriSb.append("clips?broadcaster_id=")
                 .append(broadcasterId)
                 .append("&started_at=")
-                .append(date)
-                .append("T00:00:00%2B03:00");
+                .append(date);
 
         var client = HttpClient.newHttpClient();
 

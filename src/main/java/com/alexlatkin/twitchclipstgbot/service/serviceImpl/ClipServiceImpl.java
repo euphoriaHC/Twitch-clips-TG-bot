@@ -50,8 +50,13 @@ public class ClipServiceImpl implements ClipService {
         return twitchService.getClipsByBroadcasterId(broadcaster.getBroadcasterId(), getDate());
     }
 
+    /*
+      Используется только внутри класса
+      Установка начальной даты, используемой для фильтрации клипов (Мск 00:00 в день запроса)
+      Формат RFC3339
+    */
     private String getDate() {
-        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00%2B03:00";
     }
 
 }

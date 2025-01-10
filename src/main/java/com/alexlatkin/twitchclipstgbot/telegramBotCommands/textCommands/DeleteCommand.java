@@ -4,13 +4,23 @@ import com.alexlatkin.twitchclipstgbot.controller.BroadcasterController;
 import com.alexlatkin.twitchclipstgbot.controller.UserController;
 import com.alexlatkin.twitchclipstgbot.model.entity.Broadcaster;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+/*
+ Класс команды /delete
+ Относится к командам, которые обрабатывают два сообщения пользователя, сообщения этой команды не имеют клавиатуры
+ Команда удаляет выбранного стримера из подписок или чёрного листа
+ Для удаления необходимо ввести ник стримера
+*/
 @RequiredArgsConstructor
+@Component
 public class DeleteCommand implements BotCommands, BotCommandsWithSecondMessage {
     final UserController userController;
     final BroadcasterController broadcasterController;
+
+    // Просто выводит списки подписок и чёрный лист пользователя
     @Override
     public SendMessage firstMessage(Update update) {
         var chatId = update.getMessage().getChatId();
@@ -54,6 +64,7 @@ public class DeleteCommand implements BotCommands, BotCommandsWithSecondMessage 
         return answer;
     }
 
+    // Удаляет стримера из листов (Необходимо корректно ввести ник стримера)
     @Override
     public SendMessage secondMessage(Update update) {
         var chatId = update.getMessage().getChatId();

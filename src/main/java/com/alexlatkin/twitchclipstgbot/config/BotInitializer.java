@@ -74,13 +74,14 @@ public class BotInitializer {
                                                               ,"FOLLOW_LIST_CLIPS_NEXT", followListClipsCommand);
 
 
+        // Кнопка меню рядом с полем для ввода текста
         List<BotCommand> commandsMenu = List.of(new BotCommand("/help", "Описание команд")
                                             , new BotCommand("/game_clips", "Клипы по названию игры")
                                             , new BotCommand("/caster_clips", "Клипы по нику стримера")
                                             , new BotCommand("/follow_list_clips", "Клипы по стримерам из ваших подписок")
                                             , new BotCommand("/follow_list", "Ваши подписки")
                                             , new BotCommand("/black_list", "Ваш чёрный лист")
-                                            , new BotCommand("/delete", "Удаление из чёрного списка или фоллоу листа")
+                                            , new BotCommand("/delete", "Удаление из чёрного списка или подписок")
                                             , new BotCommand("/clear_follow_list", "Очистить ваши подписки")
                                             , new BotCommand("/clear_black_list", "Очистить чёрный лист"));
         telegramBot.execute(new SetMyCommands(commandsMenu, new BotCommandScopeDefault(), null));
