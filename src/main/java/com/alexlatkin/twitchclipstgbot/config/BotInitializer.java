@@ -2,9 +2,6 @@ package com.alexlatkin.twitchclipstgbot.config;
 
 
 import com.alexlatkin.twitchclipstgbot.controller.*;
-import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.BlockButtonCommand;
-import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.FollowButtonCommand;
-import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.commandsWIthAnswer.NextClipButtonCommand;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.textCommands.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -26,40 +23,30 @@ public class BotInitializer {
     final TelegramBot telegramBot;
     final BotConfig botConfig;
     final TelegramCommands telegramCommands;
-    final FollowButtonCommand followButtonCommand;
-    final BlockButtonCommand blockButtonCommand;
-    final NextClipButtonCommand nextClipButtonCommand;
-    final ClipsController clipsController;
-    final UserController userController;
-    final GameController gameController;
-    final BroadcasterController broadcasterController;
-    final TwitchController twitchController;
-    final CacheClipsController cacheClipsController;
-    final CacheBroadcasterController cacheBroadcasterController;
+    final StartCommand startCommand;
+    final HelpCommand helpCommand;
+    final GameClipsCommand gameClipsCommand;
+    final CasterClipsCommand casterClipsCommand;
+    final FollowListClipsCommand followListClipsCommand;
+    final FollowListCommand followListCommand;
+    final BlackListCommand blackListCommand;
+    final DeleteCommand deleteCommand;
+    final ClearFollowListCommand clearFollowListCommand;
+    final ClearBlackListCommand clearBlackListCommand;
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
 
-        GameClipsCommand gameClipsCommand = new GameClipsCommand(clipsController, userController, gameController, twitchController, followButtonCommand
-                                                                , blockButtonCommand, nextClipButtonCommand, cacheClipsController, cacheBroadcasterController);
-
-        CasterClipsCommand casterClipsCommand = new CasterClipsCommand(clipsController, userController, broadcasterController, twitchController, followButtonCommand
-                                                                    , blockButtonCommand, nextClipButtonCommand, cacheClipsController, cacheBroadcasterController);
-
-        FollowListClipsCommand followListClipsCommand = new FollowListClipsCommand(userController, clipsController, nextClipButtonCommand, cacheClipsController);
-
-        DeleteCommand deleteCommand = new DeleteCommand(userController, broadcasterController);
-
-        Map<String, BotCommands> textCommandsFirstMessage = Map.of("/start", new StartCommand(userController, new HelpCommand())
-                                                    ,"/help", new HelpCommand()
-                                                    ,"/game_clips", gameClipsCommand
-                                                    ,"/caster_clips", casterClipsCommand
-                                                    ,"/follow_list_clips", followListClipsCommand
-                                                    ,"/follow_list", new FollowListCommand(userController)
-                                                    ,"/black_list", new BlackListCommand(userController)
-                                                    ,"/delete", deleteCommand
-                                                    ,"/clear_follow_list", new ClearFollowListCommand(userController)
-                                                    ,"/clear_black_list", new ClearBlackListCommand(userController));
+        Map<String, BotCommands> textCommandsFirstMessage = Map.of("/start", startCommand
+                                                                ,"/help", helpCommand
+                                                                ,"/game_clips", gameClipsCommand
+                                                                ,"/caster_clips", casterClipsCommand
+                                                                ,"/follow_list_clips", followListClipsCommand
+                                                                ,"/follow_list", followListCommand
+                                                                ,"/black_list", blackListCommand
+                                                                ,"/delete", deleteCommand
+                                                                ,"/clear_follow_list", clearFollowListCommand
+                                                                ,"/clear_black_list", clearBlackListCommand);
 
         Map<String, BotCommandsWithSecondMessage> textCommandsWithSecondMessage = Map.of("/game_clips", gameClipsCommand
                                                                                         ,"/caster_clips", casterClipsCommand
