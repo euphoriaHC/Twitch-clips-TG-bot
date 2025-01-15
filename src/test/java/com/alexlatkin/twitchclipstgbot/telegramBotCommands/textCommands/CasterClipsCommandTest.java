@@ -2,9 +2,9 @@ package com.alexlatkin.twitchclipstgbot.telegramBotCommands.textCommands;
 
 import com.alexlatkin.twitchclipstgbot.controller.*;
 import com.alexlatkin.twitchclipstgbot.exception.BroadcasterNotFoundException;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClipsDto;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchUser;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClip;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClipsDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchUser;
 import com.alexlatkin.twitchclipstgbot.model.entity.Broadcaster;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.BlockButtonCommand;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.FollowButtonCommand;

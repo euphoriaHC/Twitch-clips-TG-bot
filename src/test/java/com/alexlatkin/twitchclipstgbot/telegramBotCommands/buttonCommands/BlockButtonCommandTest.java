@@ -5,7 +5,7 @@ import com.alexlatkin.twitchclipstgbot.controller.CacheClipsController;
 import com.alexlatkin.twitchclipstgbot.controller.UserController;
 import com.alexlatkin.twitchclipstgbot.keyboard.KeyboardCasterClipsCommand;
 import com.alexlatkin.twitchclipstgbot.keyboard.KeyboardGameClipsCommand;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClip;
 import com.alexlatkin.twitchclipstgbot.model.entity.Broadcaster;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

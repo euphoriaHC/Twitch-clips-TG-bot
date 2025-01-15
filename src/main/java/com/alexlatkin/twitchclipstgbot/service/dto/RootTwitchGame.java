@@ -1,4 +1,4 @@
-package com.alexlatkin.twitchclipstgbot.model.dto;
+package com.alexlatkin.twitchclipstgbot.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

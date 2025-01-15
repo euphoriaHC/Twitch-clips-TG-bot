@@ -1,6 +1,6 @@
 package com.alexlatkin.twitchclipstgbot.model.repository;
 
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClip;
 
 import java.util.List;
 

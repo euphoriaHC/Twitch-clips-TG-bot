@@ -1,6 +1,6 @@
 package com.alexlatkin.twitchclipstgbot.service.serviceImpl;
 
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClip;
 import com.alexlatkin.twitchclipstgbot.model.repository.CacheClipsRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

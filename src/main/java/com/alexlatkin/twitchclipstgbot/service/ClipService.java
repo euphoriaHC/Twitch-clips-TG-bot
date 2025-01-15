@@ -1,6 +1,6 @@
 package com.alexlatkin.twitchclipstgbot.service;
 
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClipsDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClipsDto;
 import com.alexlatkin.twitchclipstgbot.model.entity.Broadcaster;
 import com.alexlatkin.twitchclipstgbot.model.entity.Game;
 

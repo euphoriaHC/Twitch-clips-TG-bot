@@ -1,7 +1,7 @@
 package com.alexlatkin.twitchclipstgbot.controller;
 
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchGameDto;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchUser;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchGameDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchUser;
 import com.alexlatkin.twitchclipstgbot.service.TwitchService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

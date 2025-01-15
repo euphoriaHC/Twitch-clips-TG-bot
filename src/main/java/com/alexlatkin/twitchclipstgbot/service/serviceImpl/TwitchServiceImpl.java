@@ -2,8 +2,8 @@ package com.alexlatkin.twitchclipstgbot.service.serviceImpl;
 
 import com.alexlatkin.twitchclipstgbot.config.TwitchConfig;
 import com.alexlatkin.twitchclipstgbot.exception.BroadcasterNotFoundException;
-import com.alexlatkin.twitchclipstgbot.model.dto.*;
 import com.alexlatkin.twitchclipstgbot.service.TwitchService;
+import com.alexlatkin.twitchclipstgbot.service.dto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

@@ -1,9 +1,9 @@
 package com.alexlatkin.twitchclipstgbot.telegramBotCommands.textCommands;
 
 import com.alexlatkin.twitchclipstgbot.controller.*;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClipsDto;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchGameDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClip;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClipsDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchGameDto;
 import com.alexlatkin.twitchclipstgbot.model.entity.Broadcaster;
 import com.alexlatkin.twitchclipstgbot.model.entity.Game;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.buttonCommands.BlockButtonCommand;

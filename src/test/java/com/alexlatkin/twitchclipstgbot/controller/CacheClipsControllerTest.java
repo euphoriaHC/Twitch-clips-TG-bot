@@ -1,6 +1,6 @@
 package com.alexlatkin.twitchclipstgbot.controller;
 
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClip;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClip;
 import com.alexlatkin.twitchclipstgbot.model.repository.CacheClipsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

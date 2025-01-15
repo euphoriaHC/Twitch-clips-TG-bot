@@ -1,8 +1,8 @@
 package com.alexlatkin.twitchclipstgbot.service;
 
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchClipsDto;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchGameDto;
-import com.alexlatkin.twitchclipstgbot.model.dto.TwitchUser;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClipsDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchGameDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchUser;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

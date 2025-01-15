@@ -2,7 +2,10 @@ package com.alexlatkin.twitchclipstgbot.service.serviceImpl;
 
 import com.alexlatkin.twitchclipstgbot.config.TwitchConfig;
 import com.alexlatkin.twitchclipstgbot.exception.BroadcasterNotFoundException;
-import com.alexlatkin.twitchclipstgbot.model.dto.*;
+import com.alexlatkin.twitchclipstgbot.service.dto.RootTwitchGame;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClipsDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchGameDto;
+import com.alexlatkin.twitchclipstgbot.service.dto.TwitchUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
