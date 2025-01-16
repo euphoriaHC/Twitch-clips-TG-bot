@@ -2,12 +2,6 @@
 
 REST API приложение для получение клипов с платформы Twitch.tv Для храниение данных используется PostgreSQL, для кэширования используется Redis. Пользователь работает с приложением через телеграм бота @Twitch_Clips_Today_Bot
 
-Полезные ссылки:
-
-https://dev.twitch.tv/docs/api/
-
-https://core.telegram.org/bots/api
-
 ### Technologies
 
 * Java 19
@@ -48,6 +42,12 @@ PostMan
 4. Регистрируем бота в телегераме через @BotFather
 5. Устанавливаем значения в файле application.properties
 6. Все готово к запуску
+
+Полезные ссылки:
+
+https://dev.twitch.tv/docs/api/
+
+https://core.telegram.org/bots/api
 
 ### Author
 
