@@ -60,7 +60,7 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
     public SendMessage secondMessage(Update update) {
         var chatId = update.getMessage().getChatId();
         var chatIdString = chatId.toString();
-        var gameName = update.getMessage().getText();
+        var gameName = update.getMessage().getText().toLowerCase();
 
         Game game = new Game();
         List<TwitchGameDto> gameListDto;
@@ -86,7 +86,7 @@ public class GameClipsCommand implements BotButtonCommands, BotCommandsWithSecon
             }
 
             game.setGameId(gameListDto.get(0).getId());
-            game.setGameName(gameListDto.get(0).getName());
+            game.setGameName(gameListDto.get(0).getName().toLowerCase());
             gameController.addGame(game);
         }
 

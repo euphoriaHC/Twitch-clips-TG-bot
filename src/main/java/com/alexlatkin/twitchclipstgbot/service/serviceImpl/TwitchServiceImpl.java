@@ -145,20 +145,19 @@ public class TwitchServiceImpl implements TwitchService {
         var client = HttpClient.newHttpClient();
 
         var response = client.sendAsync(twitchConfig.twitchRequest(uriSb.toString()), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
-                .thenApply(HttpResponse::body);
+                .thenApply(HttpResponse::body)
+                .thenApply(data -> {
+                    var twitchClipsDto = new TwitchClipsDto();
+                    try {
+                        twitchClipsDto = mapper.readValue(data, TwitchClipsDto.class);
+                    } catch (JsonProcessingException e) {
+                        log.error("Error: " + e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                    return twitchClipsDto;
+                });
 
-        var twitchClipsDtoCompletableFuture = response.thenApply(data -> {
-            var twitchClipsDto = new TwitchClipsDto();
-            try {
-                twitchClipsDto = mapper.readValue(data, TwitchClipsDto.class);
-            } catch (JsonProcessingException e) {
-                log.error("Error: " + e.getMessage());
-                throw new RuntimeException(e);
-            }
-            return twitchClipsDto;
-        });
-
-        return twitchClipsDtoCompletableFuture;
+        return response;
     }
 
     // Запрос на клипы по айди стримера, ничего интересного
