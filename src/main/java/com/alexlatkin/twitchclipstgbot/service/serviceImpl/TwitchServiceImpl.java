@@ -136,7 +136,7 @@ public class TwitchServiceImpl implements TwitchService {
     @Override
     @Async
     public CompletableFuture<TwitchClipsDto> getClipsByBroadcastersId(int broadcasterId, String date) {
-        StringBuffer uriSb = new StringBuffer(twitchConfig.getUrl());
+        StringBuilder uriSb = new StringBuilder(twitchConfig.getUrl());
            uriSb.append("clips?broadcaster_id=")
                 .append(broadcasterId)
                 .append("&started_at=")

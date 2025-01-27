@@ -3,9 +3,8 @@ package com.alexlatkin.twitchclipstgbot.config;
 
 import com.alexlatkin.twitchclipstgbot.controller.*;
 import com.alexlatkin.twitchclipstgbot.telegramBotCommands.textCommands.*;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -33,7 +32,7 @@ public class BotInitializer {
     final DeleteCommand deleteCommand;
     final ClearFollowListCommand clearFollowListCommand;
     final ClearBlackListCommand clearBlackListCommand;
-    @EventListener({ContextRefreshedEvent.class})
+    @PostConstruct
     public void init() throws TelegramApiException {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
 
