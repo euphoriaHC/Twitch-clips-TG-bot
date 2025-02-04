@@ -22,6 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -69,9 +70,9 @@ class GameClipsCommandTest {
         Update updateMock = mock(Update.class);
         Message messageMock = mock(Message.class);
         Long chatId = 1L;
-        String gameName = "Dota 2";
+        String gameName = "dota 2";
 
-        Game game = new Game(29595, "Dota 2");
+        Game game = new Game(29595, "dota 2");
 
         TwitchClipsDto clipList = new TwitchClipsDto(List.of(new TwitchClip("url", 1, "firstBc", 100)
                                                             , new TwitchClip("url2", 2, "secondBc", 200)));
@@ -98,7 +99,7 @@ class GameClipsCommandTest {
         verify(userController, times(1)).getUserFollowListByUserChatId(chatId);
         verify(cacheClipsController, times(1)).addClipListByUserChatId(chatId.toString(), clipList.getData());
         verify(cacheClipsController, times(1)).getClipByUserChatId(chatId.toString());
-        verify(cacheBroadcasterController, times(1)).cacheCaster(chatId + "GAME_CLIPS_COMMAND_CASTER", caster);
+        verify(cacheBroadcasterController, times(1)).cacheCaster(clipList.getData().get(0).getUrl(), caster);
         verify(userController, times(1)).getUserFollowListByUserChatId(chatId);
     }
 
@@ -107,9 +108,9 @@ class GameClipsCommandTest {
         Update updateMock = mock(Update.class);
         Message messageMock = mock(Message.class);
         Long chatId = 1L;
-        String gameName = "Dota 2";
+        String gameName = "dota 2";
 
-        Game game = new Game(29595, "Dota 2");
+        Game game = new Game(29595, "dota 2");
 
         TwitchClipsDto clipList = new TwitchClipsDto(List.of(new TwitchClip("url", 1, "firstBc", 100)
                 , new TwitchClip("url2", 2, "secondBc", 200)));
@@ -138,7 +139,7 @@ class GameClipsCommandTest {
         verify(userController, times(1)).getUserFollowListByUserChatId(chatId);
         verify(cacheClipsController, times(1)).addClipListByUserChatId(chatId.toString(), clipList.getData());
         verify(cacheClipsController, times(1)).getClipByUserChatId(chatId.toString());
-        verify(cacheBroadcasterController, times(1)).cacheCaster(chatId + "GAME_CLIPS_COMMAND_CASTER", caster);
+        verify(cacheBroadcasterController, times(1)).cacheCaster(clipList.getData().get(0).getUrl(), caster);
         verify(userController, times(1)).getUserFollowListByUserChatId(chatId);
     }
 
@@ -147,9 +148,9 @@ class GameClipsCommandTest {
         Update updateMock = mock(Update.class);
         Message messageMock = mock(Message.class);
         Long chatId = 1L;
-        String gameName = "Dota 2";
+        String gameName = "dota 2";
 
-        Game game = new Game(29595, "Dota 2");
+        Game game = new Game(29595, "dota 2");
 
         TwitchClipsDto clipList = new TwitchClipsDto(List.of(new TwitchClip("url", 1, "firstBc", 100)
                 , new TwitchClip("url2", 2, "secondBc", 200)));
@@ -181,7 +182,7 @@ class GameClipsCommandTest {
         verify(userController, times(1)).getUserFollowListByUserChatId(chatId);
         verify(cacheClipsController, times(1)).addClipListByUserChatId(chatId.toString(), clipList.getData());
         verify(cacheClipsController, times(1)).getClipByUserChatId(chatId.toString());
-        verify(cacheBroadcasterController, times(1)).cacheCaster(chatId + "GAME_CLIPS_COMMAND_CASTER", caster);
+        verify(cacheBroadcasterController, times(1)).cacheCaster(clipList.getData().get(0).getUrl(), caster);
         verify(userController, times(1)).getUserFollowListByUserChatId(chatId);
     }
 
@@ -190,7 +191,7 @@ class GameClipsCommandTest {
         Update updateMock = mock(Update.class);
         Message messageMock = mock(Message.class);
         Long chatId = 1L;
-        String gameName = "Dota 2";
+        String gameName = "dota 2";
 
         when(updateMock.getMessage()).thenReturn(messageMock);
         when(messageMock.getChatId()).thenReturn(chatId);
@@ -203,7 +204,7 @@ class GameClipsCommandTest {
 
         assertEquals(SendMessage.class, result.getClass());
         assertEquals(chatId.toString(), result.getChatId());
-        assertEquals("Некорректное название игры, отправте команду /game_clips снова и напишите название игры корректно", result.getText());
+        assertEquals("Некорректное название игры, отправьте команду /game_clips снова и напишите название игры корректно", result.getText());
         verify(gameController, times(1)).existsGameByGameName(gameName);
         verify(gameController, times(1)).existsGameByMisprintGameName(gameName);
         verify(twitchController, times(1)).getGameByGameName(gameName);
@@ -216,7 +217,7 @@ class GameClipsCommandTest {
         Message messageMock = mock(Message.class);
         var buttonKey = "GAME_CLIPS_FOLLOW";
         Long chatId = 1L;
-        var keyForPreviousCaster = chatId + "GAME_CLIPS_COMMAND_CASTER";
+        var casterKey = "url";
 
         List<TwitchClip> clipsList = List.of(new TwitchClip("url", 1, "bcName", 100));
         Broadcaster broadcaster = new Broadcaster(1, "bcName");
@@ -230,8 +231,9 @@ class GameClipsCommandTest {
         when(updateMock.getCallbackQuery().getMessage()).thenReturn(messageMock);
         when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
         when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
+        when(messageMock.getText()).thenReturn(casterKey);
         when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
-        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(broadcaster);
+        when(cacheBroadcasterController.getCacheCaster(casterKey)).thenReturn(Optional.ofNullable(broadcaster));
         when(followButtonCommand.actionButtonInCurrentMessage(updateMock, broadcaster)).thenReturn(expectedObject);
 
         EditMessageText result = (EditMessageText) gameClipsCommand.clickButton(updateMock);
@@ -240,9 +242,45 @@ class GameClipsCommandTest {
         assertEquals(chatId.toString(), result.getChatId());
         assertEquals(expectedText, result.getText());
         verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
-        verify(cacheBroadcasterController, times(1)).getCacheCaster(keyForPreviousCaster);
+        verify(cacheBroadcasterController, times(1)).getCacheCaster(casterKey);
         verify(followButtonCommand, times(1)).actionButtonInCurrentMessage(updateMock, broadcaster);
     }
+
+    @Test
+    void clickButton_FollowCase_No_Bc() {
+        Update updateMock = mock(Update.class);
+        CallbackQuery callbackQueryMock = mock(CallbackQuery.class);
+        Message messageMock = mock(Message.class);
+        var buttonKey = "GAME_CLIPS_FOLLOW";
+        Long chatId = 1L;
+        var casterKey = "url";
+
+        List<TwitchClip> clipsList = List.of(new TwitchClip("url", 1, "bcName", 100));
+        Optional<Broadcaster> broadcasterMock = mock(Optional.class);
+        String expectedText = "Не удалось подписаться на стримера";
+        SendMessage expectedObject = new SendMessage();
+        expectedObject.setChatId(chatId);
+        expectedObject.setText(expectedText);
+
+
+        when(updateMock.getCallbackQuery()).thenReturn(callbackQueryMock);
+        when(updateMock.getCallbackQuery().getMessage()).thenReturn(messageMock);
+        when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
+        when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
+        when(messageMock.getText()).thenReturn(casterKey);
+        when(broadcasterMock.isPresent()).thenReturn(false);
+        when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
+        when(cacheBroadcasterController.getCacheCaster(casterKey)).thenReturn(broadcasterMock);
+
+        SendMessage result = (SendMessage) gameClipsCommand.clickButton(updateMock);
+
+        assertEquals(SendMessage.class, result.getClass());
+        assertEquals(chatId.toString(), result.getChatId());
+        assertEquals(expectedText, result.getText());
+        verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
+        verify(cacheBroadcasterController, times(1)).getCacheCaster(casterKey);
+    }
+
     @Test
     void clickButton_BlockCase() {
         Update updateMock = mock(Update.class);
@@ -250,7 +288,7 @@ class GameClipsCommandTest {
         Message messageMock = mock(Message.class);
         var buttonKey = "GAME_CLIPS_BLOCK";
         Long chatId = 1L;
-        var keyForPreviousCaster = chatId + "GAME_CLIPS_COMMAND_CASTER";
+        var casterKey = "url";
 
         List<TwitchClip> clipsList = List.of(new TwitchClip("url", 1, "bcName", 100));
         Broadcaster broadcaster = new Broadcaster(1, "bcName");
@@ -264,8 +302,9 @@ class GameClipsCommandTest {
         when(updateMock.getCallbackQuery().getMessage()).thenReturn(messageMock);
         when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
         when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
+        when(messageMock.getText()).thenReturn(casterKey);
         when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
-        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(broadcaster);
+        when(cacheBroadcasterController.getCacheCaster(casterKey)).thenReturn(Optional.ofNullable(broadcaster));
         when(blockButtonCommand.actionButtonInCurrentMessage(updateMock, broadcaster)).thenReturn(expectedObject);
 
         EditMessageText result = (EditMessageText) gameClipsCommand.clickButton(updateMock);
@@ -274,9 +313,45 @@ class GameClipsCommandTest {
         assertEquals(chatId.toString(), result.getChatId());
         assertEquals(expectedText, result.getText());
         verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
-        verify(cacheBroadcasterController, times(1)).getCacheCaster(keyForPreviousCaster);
+        verify(cacheBroadcasterController, times(1)).getCacheCaster(casterKey);
         verify(blockButtonCommand, times(1)).actionButtonInCurrentMessage(updateMock, broadcaster);
     }
+
+    @Test
+    void clickButton_BlockCase_No_Bc(){
+        Update updateMock = mock(Update.class);
+        CallbackQuery callbackQueryMock = mock(CallbackQuery.class);
+        Message messageMock = mock(Message.class);
+        var buttonKey = "GAME_CLIPS_BLOCK";
+        Long chatId = 1L;
+        var casterKey = "url";
+
+        List<TwitchClip> clipsList = List.of(new TwitchClip("url", 1, "bcName", 100));
+        Optional<Broadcaster> broadcasterMock = mock(Optional.class);
+        String expectedText = "Не удалось добавить стримера в чёрный список";
+        SendMessage expectedObject = new SendMessage();
+        expectedObject.setChatId(chatId);
+        expectedObject.setText(expectedText);
+
+
+        when(updateMock.getCallbackQuery()).thenReturn(callbackQueryMock);
+        when(updateMock.getCallbackQuery().getMessage()).thenReturn(messageMock);
+        when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
+        when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
+        when(messageMock.getText()).thenReturn(casterKey);
+        when(broadcasterMock.isPresent()).thenReturn(false);
+        when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
+        when(cacheBroadcasterController.getCacheCaster(casterKey)).thenReturn(broadcasterMock);
+
+        SendMessage result = (SendMessage) gameClipsCommand.clickButton(updateMock);
+
+        assertEquals(SendMessage.class, result.getClass());
+        assertEquals(chatId.toString(), result.getChatId());
+        assertEquals(expectedText, result.getText());
+        verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
+        verify(cacheBroadcasterController, times(1)).getCacheCaster(casterKey);
+    }
+
     @Test
     void clickButton_NextCase() {
         Update updateMock = mock(Update.class);
@@ -284,7 +359,7 @@ class GameClipsCommandTest {
         Message messageMock = mock(Message.class);
         var buttonKey = "GAME_CLIPS_NEXT";
         Long chatId = 1L;
-        var keyForPreviousCaster = chatId + "GAME_CLIPS_COMMAND_CASTER";
+        var casterKey = "url";
 
         List<TwitchClip> clipsList = List.of(new TwitchClip("url", 1, "bcName", 100));
 
@@ -303,7 +378,7 @@ class GameClipsCommandTest {
         assertEquals(clipsList.get(0).getUrl(), result.getText());
         verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
         verify(cacheClipsController, times(1)).getClipByUserChatId(chatId.toString());
-        verify(cacheBroadcasterController, times(1)).cacheCaster(keyForPreviousCaster
+        verify(cacheBroadcasterController, times(1)).cacheCaster(clipsList.get(0).getUrl()
                 , new Broadcaster(clipsList.get(0).getBroadcasterId(), clipsList.get(0).getBroadcasterName()));
         verify(nextClipButtonCommand, times(1)).actionWithMessage(updateMock, clipsList.get(0));
     }
@@ -325,7 +400,7 @@ class GameClipsCommandTest {
 
         assertEquals(SendMessage.class, result.getClass());
         assertEquals(chatId.toString(), result.getChatId());
-        assertEquals("Клипы законичились", result.getText());
+        assertEquals("Клипы закончились", result.getText());
         verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
     }
 }

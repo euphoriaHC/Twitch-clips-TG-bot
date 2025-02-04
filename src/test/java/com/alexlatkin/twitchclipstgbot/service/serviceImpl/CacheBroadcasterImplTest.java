@@ -8,10 +8,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.time.Duration;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,9 +22,9 @@ class CacheBroadcasterImplTest {
     @InjectMocks
     CacheBroadcasterImpl cacheBroadcaster;
     @Mock
-    RedisTemplate<String, Object> redisTemplate;
+    StringRedisTemplate stringRedisTemplate;
     @Mock
-    ValueOperations<String, Object> valueOperations;
+    ValueOperations<String, String> valueOperations;
 
     @Test
     void cacheCaster() throws JsonProcessingException {
@@ -31,11 +34,11 @@ class CacheBroadcasterImplTest {
 
         String casterAsString = mapper.writeValueAsString(broadcaster);
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
         cacheBroadcaster.cacheCaster(key, broadcaster);
 
-        verify(valueOperations, times(1)).set(key, casterAsString);
+        verify(valueOperations, times(1)).set(key, casterAsString, Duration.ofHours(1));
     }
 
     @Test
@@ -59,7 +62,7 @@ class CacheBroadcasterImplTest {
 
         String casterAsString = mapper.writeValueAsString(broadcaster);
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(key)).thenReturn(casterAsString);
 
         cacheBroadcaster.getCacheCaster(key);
@@ -68,10 +71,23 @@ class CacheBroadcasterImplTest {
     }
 
     @Test
+    void getCacheCaster_No_Bc() {
+        String key = "1P";
+
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(valueOperations.get(key)).thenReturn(null);
+
+        var result = cacheBroadcaster.getCacheCaster(key);
+
+        assertEquals(Optional.empty(), result);
+        verify(valueOperations, times(1)).get(key);
+    }
+
+    @Test
     void getCacheCaster_JsonProcessingException() {
         String key = "1P";
 
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(key)).thenThrow(new RuntimeException());
 
         assertThrows(RuntimeException.class, () -> cacheBroadcaster.getCacheCaster(key));

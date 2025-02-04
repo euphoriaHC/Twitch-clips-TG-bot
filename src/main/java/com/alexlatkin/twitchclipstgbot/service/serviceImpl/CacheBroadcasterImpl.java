@@ -6,19 +6,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.time.Duration;
+import java.util.Optional;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
 public class CacheBroadcasterImpl implements CacheBroadcasterRepository {
-    private final RedisTemplate<String, Object> redisTemplate;
-    private ValueOperations valueOperations;
+    private final StringRedisTemplate stringRedisTemplate;
     @Override
     public void cacheCaster(String key, Broadcaster broadcaster) {
-        valueOperations = redisTemplate.opsForValue();
+
         ObjectMapper mapper = new ObjectMapper();
         String casterAsString;
 
@@ -29,22 +30,24 @@ public class CacheBroadcasterImpl implements CacheBroadcasterRepository {
             throw new RuntimeException(e);
         }
 
-        valueOperations.set(key, casterAsString);
+        stringRedisTemplate.opsForValue().set(key, casterAsString, Duration.ofHours(1));
     }
 
     @Override
-    public Broadcaster getCacheCaster(String key) {
-        valueOperations = redisTemplate.opsForValue();
+    public Optional<Broadcaster> getCacheCaster(String key) {
         ObjectMapper mapper = new ObjectMapper();
-        Broadcaster caster;
+        var casterAsString = stringRedisTemplate.opsForValue().get(key);
 
-        try {
-            caster = mapper.readValue(valueOperations.get(key).toString(), Broadcaster.class);
-        } catch (JsonProcessingException e) {
-            log.error("Error: " + e.getMessage());
-            throw new RuntimeException(e);
+        if (casterAsString == null) {
+            return Optional.empty();
         }
 
-        return caster;
+        try {
+            return Optional.ofNullable(mapper.readValue(casterAsString, Broadcaster.class));
+        } catch (JsonProcessingException e){
+            log.error("Error: " + e.getMessage());
+            return Optional.empty();
+        }
+
     }
 }

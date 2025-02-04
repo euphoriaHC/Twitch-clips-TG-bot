@@ -22,6 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -213,7 +214,7 @@ class CasterClipsCommandTest {
         Long chatId = 1L;
         String bcName = "pudge";
 
-        String expectedText = "Некорректное имя стримера, отправте команду /caster_clips снова и напишите имя стримера корректно";
+        String expectedText = "Некорректное имя стримера, отправьте команду /caster_clips снова и напишите имя стримера корректно";
 
         when(updateMock.getMessage()).thenReturn(messageMock);
         when(messageMock.getChatId()).thenReturn(chatId);
@@ -251,7 +252,7 @@ class CasterClipsCommandTest {
         when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
         when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
         when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
-        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(broadcaster);
+        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(Optional.ofNullable(broadcaster));
         when(followButtonCommand.actionButtonInCurrentMessage(updateMock, broadcaster)).thenReturn(expectedObject);
 
         EditMessageText result = (EditMessageText) casterClipsCommand.clickButton(updateMock);
@@ -263,6 +264,40 @@ class CasterClipsCommandTest {
         verify(cacheBroadcasterController, times(1)).getCacheCaster(keyForPreviousCaster);
         verify(followButtonCommand, times(1)).actionButtonInCurrentMessage(updateMock, broadcaster);
     }
+
+    @Test
+    void clickButton_FollowCase_No_Bc() {
+        Update updateMock = mock(Update.class);
+        CallbackQuery callbackQueryMock = mock(CallbackQuery.class);
+        Message messageMock = mock(Message.class);
+        var buttonKey = "CASTER_CLIPS_FOLLOW";
+        Long chatId = 1L;
+        var keyForPreviousCaster = chatId + "CASTER_CLIPS_COMMAND_CASTER";
+
+        List<TwitchClip> clipsList = List.of(new TwitchClip("url", 1, "bcName", 100));
+        Optional<Broadcaster> broadcaster = mock(Optional.class);
+        String expectedText = "Не удалось подписаться на стримера";
+        SendMessage expectedObject = new SendMessage();
+        expectedObject.setChatId(chatId);
+        expectedObject.setText(expectedText);
+
+        when(updateMock.getCallbackQuery()).thenReturn(callbackQueryMock);
+        when(updateMock.getCallbackQuery().getMessage()).thenReturn(messageMock);
+        when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
+        when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
+        when(broadcaster.isPresent()).thenReturn(false);
+        when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
+        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(broadcaster);
+
+        SendMessage result = (SendMessage) casterClipsCommand.clickButton(updateMock);
+
+        assertEquals(SendMessage.class, result.getClass());
+        assertEquals(chatId.toString(), result.getChatId());
+        assertEquals(expectedText, result.getText());
+        verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
+        verify(cacheBroadcasterController, times(1)).getCacheCaster(keyForPreviousCaster);
+    }
+
     @Test
     void clickButton_BlockCase() {
         Update updateMock = mock(Update.class);
@@ -284,7 +319,7 @@ class CasterClipsCommandTest {
         when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
         when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
         when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
-        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(broadcaster);
+        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(Optional.ofNullable(broadcaster));
         when(blockButtonCommand.actionButtonInCurrentMessage(updateMock, broadcaster)).thenReturn(expectedObject);
 
         EditMessageText result = (EditMessageText) casterClipsCommand.clickButton(updateMock);
@@ -296,6 +331,40 @@ class CasterClipsCommandTest {
         verify(cacheBroadcasterController, times(1)).getCacheCaster(keyForPreviousCaster);
         verify(blockButtonCommand, times(1)).actionButtonInCurrentMessage(updateMock, broadcaster);
     }
+
+    @Test
+    void clickButton_BlockCase_No_Bc() {
+        Update updateMock = mock(Update.class);
+        CallbackQuery callbackQueryMock = mock(CallbackQuery.class);
+        Message messageMock = mock(Message.class);
+        var buttonKey = "CASTER_CLIPS_BLOCK";
+        Long chatId = 1L;
+        var keyForPreviousCaster = chatId + "CASTER_CLIPS_COMMAND_CASTER";
+
+        List<TwitchClip> clipsList = List.of(new TwitchClip("url", 1, "bcName", 100));
+        Optional<Broadcaster> broadcaster = mock(Optional.class);
+        String expectedText = "Не удалось добавить стримера в чёрный список";
+        SendMessage expectedObject = new SendMessage();
+        expectedObject.setChatId(chatId);
+        expectedObject.setText(expectedText);
+
+        when(updateMock.getCallbackQuery()).thenReturn(callbackQueryMock);
+        when(updateMock.getCallbackQuery().getMessage()).thenReturn(messageMock);
+        when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
+        when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
+        when(broadcaster.isPresent()).thenReturn(false);
+        when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
+        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(broadcaster);
+
+        SendMessage result = (SendMessage) casterClipsCommand.clickButton(updateMock);
+
+        assertEquals(SendMessage.class, result.getClass());
+        assertEquals(chatId.toString(), result.getChatId());
+        assertEquals(expectedText, result.getText());
+        verify(cacheClipsController, times(1)).getClipListByUserChatId(chatId.toString());
+        verify(cacheBroadcasterController, times(1)).getCacheCaster(keyForPreviousCaster);
+    }
+
     @Test
     void clickButton_NextCase() {
         Update updateMock = mock(Update.class);
@@ -313,7 +382,7 @@ class CasterClipsCommandTest {
         when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
         when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
         when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(clipsList);
-        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(broadcaster);
+        when(cacheBroadcasterController.getCacheCaster(keyForPreviousCaster)).thenReturn(Optional.ofNullable(broadcaster));
         when(cacheClipsController.getClipByUserChatId(chatId.toString())).thenReturn(clipsList.get(0));
         when(nextClipButtonCommand.actionWithMessage(updateMock, clipsList.get(0))).thenReturn(new SendMessage(chatId.toString(), clipsList.get(0).getUrl()));
 
@@ -342,7 +411,7 @@ class CasterClipsCommandTest {
         when(updateMock.getCallbackQuery().getMessage()).thenReturn(messageMock);
         when(updateMock.getCallbackQuery().getData()).thenReturn(buttonKey);
         when(updateMock.getCallbackQuery().getMessage().getChatId()).thenReturn(chatId);
-        when(cacheBroadcasterController.getCacheCaster(keyForFollowOrBlockCaster)).thenReturn(broadcaster);
+        when(cacheBroadcasterController.getCacheCaster(keyForFollowOrBlockCaster)).thenReturn(Optional.ofNullable(broadcaster));
         when(cacheClipsController.getClipListByUserChatId(chatId.toString())).thenReturn(Collections.emptyList());
 
         SendMessage result = (SendMessage) casterClipsCommand.clickButton(updateMock);

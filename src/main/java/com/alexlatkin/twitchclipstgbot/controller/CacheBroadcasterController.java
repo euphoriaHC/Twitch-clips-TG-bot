@@ -5,6 +5,8 @@ import com.alexlatkin.twitchclipstgbot.model.repository.CacheBroadcasterReposito
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
+import java.util.Optional;
+
 @Controller
 @RequiredArgsConstructor
 public class CacheBroadcasterController {
@@ -14,7 +16,7 @@ public class CacheBroadcasterController {
         cacheBroadcaster.cacheCaster(key, broadcaster);
     }
 
-    public Broadcaster getCacheCaster(String key) {
+    public Optional<Broadcaster> getCacheCaster(String key) {
         return cacheBroadcaster.getCacheCaster(key);
     }
 }

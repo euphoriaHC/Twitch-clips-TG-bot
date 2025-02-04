@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Repository
@@ -43,6 +44,8 @@ public class CacheClipsImpl implements CacheClipsRepository {
         for (TwitchClip clip : twitchClipList) {
             addClipByUserChatId(userChatId, clip);
         }
+
+        redisTemplate.expire(userChatId, 24, TimeUnit.HOURS);
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,6 +70,7 @@ class CacheClipsImplTest {
             verify(listOperations).leftPush(chatId, clipAsString);
         }
         verify(redisTemplate, times(1)).delete(chatId);
+        verify(redisTemplate, times(1)).expire(chatId, 72, TimeUnit.HOURS);
     }
 
     @Test

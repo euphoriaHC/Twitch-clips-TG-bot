@@ -83,7 +83,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     // Бот отправляет сообщение пользователю
-    public void sendAnswerMessage(BotApiMethod message) {
+    public void sendAnswerMessage(BotApiMethod<?> message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {

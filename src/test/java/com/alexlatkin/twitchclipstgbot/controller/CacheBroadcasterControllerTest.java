@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -29,7 +31,7 @@ class CacheBroadcasterControllerTest {
 
     @Test
     void getCacheCaster() {
-        Broadcaster broadcasterMock = mock(Broadcaster.class);
+        Optional<Broadcaster> broadcasterMock = mock(Optional.class);
         String key = "1P";
 
         when(cacheBroadcaster.getCacheCaster(key)).thenReturn(broadcasterMock);

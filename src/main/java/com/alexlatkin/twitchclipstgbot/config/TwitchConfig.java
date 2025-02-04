@@ -10,6 +10,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Data
@@ -18,6 +20,8 @@ import java.time.Duration;
 public class TwitchConfig {
     @Value("${twitchConfig.url}")
     private String url;
+    @Value("${twitchConfig.time}")
+    private String time;
     @Value("${twitchConfig.firstHeaderName}")
     private String firstHeaderName;
     @Value("${twitchConfig.firstHeaderValue}")
@@ -46,6 +50,21 @@ public class TwitchConfig {
                 .build();
 
         return request;
+
+    }
+
+    /*
+      Установка начальной даты, используемой для получения клипов (Если в application.properties не установлено значение time, значением будет
+                                                                   00:00 в день запроса по Мск)
+      Формат RFC3339
+    */
+    public String getDate() {
+
+        if (time.isEmpty()) {
+            return LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00%2B03:00";
+        } else {
+            return getTime();
+        }
 
     }
 }

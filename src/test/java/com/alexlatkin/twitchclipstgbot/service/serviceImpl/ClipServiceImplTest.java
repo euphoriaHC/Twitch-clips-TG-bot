@@ -1,5 +1,6 @@
 package com.alexlatkin.twitchclipstgbot.service.serviceImpl;
 
+import com.alexlatkin.twitchclipstgbot.config.TwitchConfig;
 import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClip;
 import com.alexlatkin.twitchclipstgbot.service.dto.TwitchClipsDto;
 import com.alexlatkin.twitchclipstgbot.model.entity.Broadcaster;
@@ -26,6 +27,8 @@ class ClipServiceImplTest {
     ClipServiceImpl clipService;
     @Mock
     TwitchService twitchService;
+    @Mock
+    TwitchConfig twitchConfig;
 
     @Test
     void getClipsByGame_ShouldCallTwitchService() {
@@ -35,15 +38,16 @@ class ClipServiceImplTest {
         TwitchClipsDto twitchClipsDto = new TwitchClipsDto(clipList);
 
         LocalDate localDate = LocalDate.now();
-        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00%2B03:00";
 
         when(gameMock.getGameId()).thenReturn(1);
+        when(twitchConfig.getDate()).thenReturn(date);
         when(twitchService.getClipsByGameId(gameMock.getGameId(), date)).thenReturn(twitchClipsDto);
 
         var result = clipService.getClipsByGame(gameMock);
 
         assertEquals(twitchClipsDto, result);
-        verify(twitchService, times(1)).getClipsByGameId(gameMock.getGameId(), date);
+        verify(twitchService, times(1)).getClipsByGameId(gameMock.getGameId(), twitchConfig.getDate());
     }
 
     @Test
@@ -56,8 +60,9 @@ class ClipServiceImplTest {
                 CompletableFuture.completedFuture(new TwitchClipsDto(List.of(new TwitchClip("url", 2, "secondClip", 200)))));
 
         LocalDate localDate = LocalDate.now();
-        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00%2B03:00";
 
+        when(twitchConfig.getDate()).thenReturn(date);
         when(twitchService.getClipsByBroadcastersId(userFollowList.get(0).getBroadcasterId(), date)).thenReturn(expectedClips.get(0));
         when(twitchService.getClipsByBroadcastersId(userFollowList.get(1).getBroadcasterId(), date)).thenReturn(expectedClips.get(1));
 
@@ -66,8 +71,8 @@ class ClipServiceImplTest {
         assertEquals(expectedClips.get(0), result.get(0));
         assertEquals(expectedClips.get(1), result.get(1));
 
-        verify(twitchService, times(1)).getClipsByBroadcastersId(userFollowList.get(0).getBroadcasterId(), date);
-        verify(twitchService, times(1)).getClipsByBroadcastersId(userFollowList.get(1).getBroadcasterId(), date);
+        verify(twitchService, times(1)).getClipsByBroadcastersId(userFollowList.get(0).getBroadcasterId(), twitchConfig.getDate());
+        verify(twitchService, times(1)).getClipsByBroadcastersId(userFollowList.get(1).getBroadcasterId(), twitchConfig.getDate());
     }
 
     @Test
@@ -79,12 +84,13 @@ class ClipServiceImplTest {
         futureWithError.completeExceptionally(new RuntimeException());
 
         LocalDate localDate = LocalDate.now();
-        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00%2B03:00";
 
+        when(twitchConfig.getDate()).thenReturn(date);
         when(twitchService.getClipsByBroadcastersId(userFollowList.get(0).getBroadcasterId(), date)).thenReturn(futureWithError);
 
         assertThrows(RuntimeException.class, () -> clipService.getClipsByUserFollowList(userFollowList));
-        verify(twitchService, times(1)).getClipsByBroadcastersId(userFollowList.get(0).getBroadcasterId(), date);
+        verify(twitchService, times(1)).getClipsByBroadcastersId(userFollowList.get(0).getBroadcasterId(), twitchConfig.getDate());
     }
 
     @Test
@@ -95,14 +101,15 @@ class ClipServiceImplTest {
         TwitchClipsDto twitchClipsDto = new TwitchClipsDto(clipList);
 
         LocalDate localDate = LocalDate.now();
-        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String date = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T00:00:00%2B03:00";
 
+        when(twitchConfig.getDate()).thenReturn(date);
         when(broadcasterMock.getBroadcasterId()).thenReturn(1);
         when(twitchService.getClipsByBroadcasterId(broadcasterMock.getBroadcasterId(),date)).thenReturn(twitchClipsDto);
 
         var result = clipService.getClipsByBroadcaster(broadcasterMock);
 
         assertEquals(twitchClipsDto, result);
-        verify(twitchService, times(1)).getClipsByBroadcasterId(broadcasterMock.getBroadcasterId(), date);
+        verify(twitchService, times(1)).getClipsByBroadcasterId(broadcasterMock.getBroadcasterId(), twitchConfig.getDate());
     }
 }

@@ -19,6 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 /*
  Класс команды /caster_clips
@@ -128,23 +129,37 @@ public class CasterClipsCommand implements BotButtonCommands, BotCommandsWithSec
       Возвращает SenMessage или EditMessageText объект в зависимости от нажатой кнопки...
     */
     @Override
-    public BotApiMethod clickButton(Update update) {
+    public BotApiMethod<?> clickButton(Update update) {
         var buttonKey = update.getCallbackQuery().getData();
         var chatIdString = update.getCallbackQuery().getMessage().getChatId().toString();
         List<TwitchClip> twitchClipList = cacheClipsController.getClipListByUserChatId(chatIdString);
 
-        var keyForFollowOrBlockCaster = chatIdString + "CASTER_CLIPS_COMMAND_CASTER";
-        var caster = cacheBroadcasterController.getCacheCaster(keyForFollowOrBlockCaster);
+        Optional<Broadcaster> caster = cacheBroadcasterController.getCacheCaster(chatIdString + "CASTER_CLIPS_COMMAND_CASTER");
 
         if (twitchClipList.isEmpty() && buttonKey.equals("CASTER_CLIPS_NEXT")) {
-            return new SendMessage(chatIdString, String.format("Клипы %S закончились", caster.getBroadcasterName()));
+            return new SendMessage(chatIdString, String.format("Клипы %S закончились", caster.get().getBroadcasterName()));
         } else {
 
-            BotApiMethod answer = null;
+            BotApiMethod<?> answer = null;
 
             switch (buttonKey) {
-                case "CASTER_CLIPS_FOLLOW" -> answer = followButtonCommand.actionButtonInCurrentMessage(update, caster);
-                case "CASTER_CLIPS_BLOCK" -> answer = blockButtonCommand.actionButtonInCurrentMessage(update, caster);
+                case "CASTER_CLIPS_FOLLOW" -> {
+
+                    if (caster.isPresent()) {
+                        answer = followButtonCommand.actionButtonInCurrentMessage(update, caster.get());
+                    } else {
+                        answer = new SendMessage(chatIdString, "Не удалось подписаться на стримера");
+                    }
+
+                }
+                case "CASTER_CLIPS_BLOCK" -> {
+
+                    if (caster.isPresent()) {
+                        answer = blockButtonCommand.actionButtonInCurrentMessage(update, caster.get());
+                    } else {
+                        answer = new SendMessage(chatIdString, "Не удалось добавить стримера в чёрный список");
+                    }
+                }
                 case "CASTER_CLIPS_NEXT" -> {
                     var clip = cacheClipsController.getClipByUserChatId(chatIdString);
                     answer = nextClipButtonCommand.actionWithMessage(update, clip);
