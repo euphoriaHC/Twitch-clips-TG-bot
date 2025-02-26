@@ -37,7 +37,7 @@ PostMan
 ### Setup
 
 1. Клонируем проект https://github.com/euphoriaHC/Twitch-clips-TG-bot.git
-2. Установите базы данных PostgreSQL и Redis. Создайте таблицы с помощью команд из файла DBFILE.md
+2. Установите базы данных PostgreSQL и Redis. Создайте таблицы с помощью sql команд из файла init_db.sql
 3. Регистрируемся на Twitch и регистриурем свое приложение, инструкция: https://dev.twitch.tv/docs/api/get-started/
 4. Регистрируем бота в телегераме через @BotFather
 5. Устанавливаем значения в файле application.properties
