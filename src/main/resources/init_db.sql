@@ -1,4 +1,7 @@
-CREATE TABLE IF NOT EXISTS users (chat_id bigint primary key, name varchar(64) not null unique);
+CREATE DATABASE IF NOT EXISTS postgres;
+USE postgres;
+
+CREATE TABLE IF NOT EXISTS users (chat_id bigint primary key, name varchar(64) not null);
 
 CREATE TABLE IF NOT EXISTS broadcaster (broadcaster_id int primary key, broadcaster_name varchar(64) not null unique);
 
